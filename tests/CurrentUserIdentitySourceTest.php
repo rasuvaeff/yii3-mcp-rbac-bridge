@@ -21,7 +21,7 @@ final class CurrentUserIdentitySourceTest
     {
         $currentUser = new CurrentUser(new StaticIdentityRepository(), new SimpleEventDispatcher());
 
-        Assert::null(new CurrentUserIdentitySource($currentUser)->getId());
+        Assert::null((new CurrentUserIdentitySource($currentUser))->getId());
     }
 
     public function authenticatedUserResolvesToItsId(): void
@@ -29,6 +29,6 @@ final class CurrentUserIdentitySourceTest
         $currentUser = new CurrentUser(new StaticIdentityRepository(), new SimpleEventDispatcher());
         $currentUser->login(new StaticIdentity('42'));
 
-        Assert::same(new CurrentUserIdentitySource($currentUser)->getId(), '42');
+        Assert::same((new CurrentUserIdentitySource($currentUser))->getId(), '42');
     }
 }

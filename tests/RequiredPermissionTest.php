@@ -17,7 +17,7 @@ final class RequiredPermissionTest
 {
     public function carriesThePermissionName(): void
     {
-        Assert::same(new RequiredPermission('orders.view')->permission, 'orders.view');
+        Assert::same((new RequiredPermission('orders.view'))->permission, 'orders.view');
     }
 
     public function rejectsAnEmptyPermission(): void
