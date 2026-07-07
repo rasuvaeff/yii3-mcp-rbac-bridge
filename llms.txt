@@ -1,0 +1,70 @@
+# yii3-mcp-rbac-bridge
+
+Per-user RBAC for rasuvaeff/yii3-mcp servers over the Yii3 auth stack:
+permissions on tools/call, permission-aware tools/list, session-identity
+binding. Application-facing alternative to OAuth 2.1.
+
+## Install
+
+```bash
+composer require rasuvaeff/yii3-mcp-rbac-bridge
+```
+
+## Rules
+
+- TWO auth layers: yii3-mcp SharedSecretMiddleware = machine auth (keep it!),
+  this bridge = user auth. Route middleware order: SharedSecret ->
+  Authentication (yiisoft/auth) -> McpAction.
+- Restriction is explicit per-tool: tools without a mapped permission are
+  unrestricted. #[RequiredPermission] without #[McpTool] on the same method
+  => InvalidPermissionMapException at map build time (fail-fast). Same for
+  one tool name mapped to two different permissions by attributes
+  (explicit overrides win by design and are exempt).
+- Session binding happens on the FIRST tools/call (the core interceptor
+  chain does not see initialize); guests bind as guests and cannot be
+  impersonated by a literal "guest" user id.
+- Denials are regular MCP tool-error envelopes (agent sees the reason).
+
+## API reference
+
+```php
+use Rasuvaeff\Yii3McpRbacBridge\ {
+    CurrentUserIdentitySource, IdentitySourceInterface, PermissionMap,
+    RbacToolCallInterceptor, RbacToolVisibility, RequiredPermission,
+    SessionIdentityInterceptor,
+};
+
+// Declaring:
+#[McpTool(name: 'order.status')]
+#[RequiredPermission('orders.view')]
+public function status(string $orderId): string { ... }
+
+// Map (tool name => permission); explicit overrides win over attributes:
+$map = PermissionMap::fromToolClasses([OrderTools::class], ['ping' => 'monitoring.read']);
+$map->permissionFor('order.status');   // 'orders.view' | null = unrestricted
+// unknown class / empty names / misplaced attribute => Exception\InvalidPermissionMapException
+
+// Enforcement (implements yii3-mcp ToolCallInterceptorInterface):
+new RbacToolCallInterceptor($accessChecker, $identitySource, $map);
+// $accessChecker: Yiisoft\Access\AccessCheckerInterface (bind your rbac Manager)
+// guest (null id) => denied on mapped tools; unmapped tools pass through
+
+// Listing (implements yii3-mcp Visibility\ToolVisibilityInterface):
+new RbacToolVisibility($accessChecker, $identitySource, $map);
+// same map + checker as the interceptor => list and call never disagree
+
+// Session hijacking guard (implements ToolCallInterceptorInterface, put OUTERMOST):
+new SessionIdentityInterceptor($identitySource);
+// binds first identity to the session; different identity later =>
+// tool error "MCP session is bound to a different identity"
+
+// Identity:
+interface IdentitySourceInterface { public function getId(): ?string; } // null = guest
+new CurrentUserIdentitySource($currentUser);   // yiisoft/user CurrentUser
+
+// yii3-mcp params wiring:
+// 'interceptors' => [SessionIdentityInterceptor::class, RbacToolCallInterceptor::class],
+// 'tool_visibility' => RbacToolVisibility::class,
+// DI: IdentitySourceInterface => CurrentUserIdentitySource,
+//     PermissionMap => static fn() => PermissionMap::fromToolClasses([...])
+```
