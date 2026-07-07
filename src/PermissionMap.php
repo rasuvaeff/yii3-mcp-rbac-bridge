@@ -57,7 +57,16 @@ final readonly class PermissionMap
                 throw new InvalidPermissionMapException(sprintf('Tool class "%s" does not exist', $class));
             }
 
-            foreach ((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $reflection = new ReflectionClass($class);
+
+            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                // yii3-mcp registers neither static nor constructor/destructor
+                // methods, so a permission on one could never be enforced — skip
+                // them exactly as the server registration does.
+                if ($method->isStatic() || $method->isConstructor() || $method->isDestructor()) {
+                    continue;
+                }
+
                 $required = $method->getAttributes(RequiredPermission::class);
 
                 if ($required === []) {
@@ -77,7 +86,7 @@ final readonly class PermissionMap
                 $permission = $required[0]->newInstance()->permission;
 
                 foreach ($tools as $tool) {
-                    $name = $tool->newInstance()->name ?? $method->getName();
+                    $name = self::toolName($tool->newInstance(), $reflection, $method);
 
                     if (isset($permissions[$name]) && $permissions[$name] !== $permission) {
                         throw new InvalidPermissionMapException(sprintf(
@@ -94,6 +103,21 @@ final readonly class PermissionMap
         }
 
         return new self([...$permissions, ...$overrides]);
+    }
+
+    /**
+     * The tool name yii3-mcp actually registers for this handler, mirroring the
+     * SDK's {@see \Mcp\Capability\Registry\Loader\ReflectedElementLoader}: an
+     * explicit #[McpTool] name wins; an invokable tool (`__invoke`) is named
+     * after its class short name, every other method after itself. Deriving it
+     * any other way would map the permission under a name no `tools/call` ever
+     * carries — a silent fail-open.
+     *
+     * @param ReflectionClass<object> $class
+     */
+    private static function toolName(McpTool $tool, ReflectionClass $class, ReflectionMethod $method): string
+    {
+        return $tool->name ?? ('__invoke' === $method->getName() ? $class->getShortName() : $method->getName());
     }
 
     /**

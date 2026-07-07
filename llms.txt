@@ -20,6 +20,12 @@ composer require rasuvaeff/yii3-mcp-rbac-bridge
   => InvalidPermissionMapException at map build time (fail-fast). Same for
   one tool name mapped to two different permissions by attributes
   (explicit overrides win by design and are exempt).
+- Tool name = map key. Derived exactly as yii3-mcp registers it: explicit
+  #[McpTool(name)] wins; else the method name; for an invokable tool
+  (#[McpTool] on __invoke, no name) the CLASS SHORT NAME, not "__invoke".
+  fromToolClasses() computes keys for you; an EXPLICIT map/override must use
+  that same runtime name (invokable => class short name) or the tool stays
+  silently unrestricted.
 - Session binding happens on the FIRST tools/call (the core interceptor
   chain does not see initialize); guests bind as guests and cannot be
   impersonated by a literal "guest" user id.

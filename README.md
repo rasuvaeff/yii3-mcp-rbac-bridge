@@ -72,6 +72,28 @@ a bug, not a default. One tool name mapped to two different permissions by
 attributes fails the build too (a silent last-one-wins would enforce an
 arbitrary one); explicit overrides win by design.
 
+### Tool names: what the map keys must be
+
+`PermissionMap` keys are tool names, and the bridge derives each one exactly as
+yii3-mcp registers it — so list and call can never key off different names:
+
+| Tool declaration | Registered name = map key |
+|---|---|
+| `#[McpTool(name: 'order.status')]` | `order.status` — the explicit name wins |
+| `#[McpTool]` on `public function status()` | `status` — the method name |
+| `#[McpTool]` on `public function __invoke()` | the **class short name** (e.g. `RefundTool`), **not** `__invoke` |
+
+`fromToolClasses()` computes these keys for you. Only an **explicit** map (the
+`$overrides` argument, or `new PermissionMap([...])`) is yours to key correctly —
+for an invokable tool that key is the class short name:
+
+```php
+new PermissionMap(['RefundTool' => 'orders.refund']);   // invokable RefundTool::__invoke
+```
+
+A key that matches no registered tool is inert (the tool stays unrestricted), so
+keep explicit keys in sync with the tool names above.
+
 ### 2. Wire the bridge
 
 ```php

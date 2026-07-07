@@ -7,8 +7,11 @@ namespace Rasuvaeff\Yii3McpRbacBridge\Tests;
 use Rasuvaeff\Yii3McpRbacBridge\Exception\InvalidPermissionMapException;
 use Rasuvaeff\Yii3McpRbacBridge\PermissionMap;
 use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\ConflictingOrderTools;
+use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\InvokableSecretTool;
 use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\MisplacedPermissionTool;
+use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\NamelessRegularTool;
 use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\OrderTools;
+use Rasuvaeff\Yii3McpRbacBridge\Tests\Support\SkippedMethodsTool;
 use Testo\Assert;
 use Testo\Codecov\Covers;
 use Testo\Data\DataProvider;
@@ -45,6 +48,35 @@ final class PermissionMapTest
         Assert::same($map->permissionFor('order.status'), 'orders.admin');
         Assert::same($map->permissionFor('ping'), 'monitoring.read');
         Assert::same($map->permissionFor('order.refund'), 'orders.refund');
+    }
+
+    public function invokableToolIsMappedByClassShortNameNotInvoke(): void
+    {
+        // yii3-mcp registers a nameless __invoke tool under the class short name;
+        // mapping it under "__invoke" would silently leave it unprotected.
+        $map = PermissionMap::fromToolClasses([InvokableSecretTool::class]);
+
+        Assert::same($map->permissionFor('InvokableSecretTool'), 'secret.use');
+        Assert::null($map->permissionFor('__invoke'));
+    }
+
+    public function regularToolWithoutExplicitNameIsMappedByMethodName(): void
+    {
+        $map = PermissionMap::fromToolClasses([NamelessRegularTool::class]);
+
+        Assert::same($map->permissionFor('reconcile'), 'ledger.reconcile');
+    }
+
+    public function staticConstructorAndDestructorMethodsAreSkipped(): void
+    {
+        // yii3-mcp never registers these as tools, so mapping their permissions
+        // would enforce them under a name no call carries.
+        $map = PermissionMap::fromToolClasses([SkippedMethodsTool::class]);
+
+        Assert::null($map->permissionFor('__construct'));
+        Assert::null($map->permissionFor('__destruct'));
+        Assert::null($map->permissionFor('factory'));
+        Assert::same($map->permissionFor('kept'), 'kept.perm');
     }
 
     public function conflictingAttributePermissionsForOneToolFailFast(): void

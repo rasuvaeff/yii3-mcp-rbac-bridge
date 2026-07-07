@@ -60,6 +60,15 @@ docker run --rm -v /home/rasuvaeff/projects/rasuvaeff:/repo -w /repo/yii3-mcp-rb
 
 ## Invariants & gotchas
 
+- `PermissionMap` keys MUST be the exact names yii3-mcp registers, or the
+  permission is mapped under a name no call ever carries — a silent fail-open.
+  `PermissionMap::toolName()` mirrors the SDK's `ReflectedElementLoader`:
+  explicit `#[McpTool(name)]` wins, else `'__invoke' === $method ? classShortName
+  : methodName`. yii3-mcp registers only METHOD-level `#[McpTool]` (never
+  class-level) and does NOT skip `__invoke`; it skips static/ctor/dtor. Keep
+  `toolName()` in lockstep with `ReflectedElementLoader` + `McpServerFactory::register()`
+  — covered by `RbacToolCallInterceptorTest::invokableToolWithoutExplicitNameIsProtected`
+  (end-to-end through the real `McpTester`, would fail-open if they drift).
 - Session binding happens on the FIRST `tools/call` — the yii3-mcp
   interceptor chain does not see `initialize`. Documented in README
   ("Security notes"); binding-on-initialize would need a custom
