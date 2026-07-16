@@ -7,6 +7,7 @@
 [![Psalm level](https://img.shields.io/badge/psalm-level%201-141F48?logo=psalm&logoColor=white)](https://github.com/rasuvaeff/yii3-mcp-rbac-bridge/blob/master/psalm.xml)
 [![PHP](https://img.shields.io/packagist/dependency-v/rasuvaeff/yii3-mcp-rbac-bridge/php)](https://packagist.org/packages/rasuvaeff/yii3-mcp-rbac-bridge)
 [![License](https://img.shields.io/packagist/l/rasuvaeff/yii3-mcp-rbac-bridge)](LICENSE.md)
+[Русская версия](README.ru.md)
 
 Per-user authorization for [rasuvaeff/yii3-mcp](https://github.com/rasuvaeff/yii3-mcp)
 servers over the Yii3 auth stack — the application-facing alternative to
