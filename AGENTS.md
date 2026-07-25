@@ -17,7 +17,8 @@ attributes and/or an explicit array); `RbacToolVisibility` (yii3-mcp
 
 Public API: `RequiredPermission`, `PermissionMap`, `RbacToolCallInterceptor`,
 `RbacToolVisibility`, `SessionIdentityInterceptor`, `IdentitySourceInterface`,
-`CurrentUserIdentitySource`, `Exception\InvalidPermissionMapException`.
+`CurrentUserIdentitySource`, `StaticIdentitySource`,
+`Exception\InvalidPermissionMapException`.
 
 ## Golden rules
 

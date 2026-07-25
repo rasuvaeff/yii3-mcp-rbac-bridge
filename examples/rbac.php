@@ -7,12 +7,12 @@ use Mcp\Server\Session\InMemorySessionStore;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Rasuvaeff\Yii3Mcp\McpServerFactory;
 use Rasuvaeff\Yii3Mcp\Testing\McpTester;
-use Rasuvaeff\Yii3McpRbacBridge\IdentitySourceInterface;
 use Rasuvaeff\Yii3McpRbacBridge\PermissionMap;
 use Rasuvaeff\Yii3McpRbacBridge\RbacToolCallInterceptor;
 use Rasuvaeff\Yii3McpRbacBridge\RbacToolVisibility;
 use Rasuvaeff\Yii3McpRbacBridge\RequiredPermission;
 use Rasuvaeff\Yii3McpRbacBridge\SessionIdentityInterceptor;
+use Rasuvaeff\Yii3McpRbacBridge\StaticIdentitySource;
 use Yiisoft\Access\AccessCheckerInterface;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
@@ -61,13 +61,7 @@ $accessChecker = new class implements AccessCheckerInterface {
     }
 };
 
-$identity = new class implements IdentitySourceInterface {
-    #[\Override]
-    public function getId(): ?string
-    {
-        return '42';
-    }
-};
+$identity = new StaticIdentitySource('42');
 
 $permissions = PermissionMap::fromToolClasses([OrderTools::class]);
 

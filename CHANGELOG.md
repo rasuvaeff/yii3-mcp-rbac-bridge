@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.1.0 — 2026-07-25
+
+- Add `StaticIdentitySource` for explicit console/stdio identities and document
+  the distinct web and CLI bindings, including guest semantics for empty roles.
 
 - Internal: benchmark migrated to testo/bench comparison style (`#[Bench]`
   without `callables` aborts on testo/bench 0.1.6); compares map building

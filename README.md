@@ -101,6 +101,7 @@ keep explicit keys in sync with the tool names above.
 // config/common/di/mcp-rbac.php
 use Rasuvaeff\Yii3McpRbacBridge\ {
     CurrentUserIdentitySource, IdentitySourceInterface, PermissionMap,
+    StaticIdentitySource,
 };
 
 return [
@@ -108,6 +109,20 @@ return [
     PermissionMap::class => static fn () => PermissionMap::fromToolClasses(
         [OrderTools::class],                       // same list as the `tools` params
         // ['order.status' => 'orders.admin'],     // optional explicit overrides
+    ),
+];
+```
+
+Split identity wiring by entry point; stdio has no HTTP `CurrentUser`:
+
+```php
+// config/web/di.php
+return [IdentitySourceInterface::class => CurrentUserIdentitySource::class];
+
+// config/console/di.php
+return [
+    IdentitySourceInterface::class => static fn () => new StaticIdentitySource(
+        getenv('MCP_USER_ID') ?: null,
     ),
 ];
 ```
@@ -136,6 +151,7 @@ with `rbac-php`/`rbac-db` storage — see `suggest`).
 | `SessionIdentityInterceptor` | binds the MCP session to its first identity; a leaked `Mcp-Session-Id` presented with another user's token is rejected |
 | `PermissionMap` | tool name → permission: `#[RequiredPermission]` scan + explicit overrides |
 | `CurrentUserIdentitySource` | identity id from yiisoft/user `CurrentUser` (null = guest); implement `IdentitySourceInterface` for stdio/custom setups |
+| `StaticIdentitySource` | fixed config/env identity for console/stdio; `null` means guest |
 
 ## Security notes
 
@@ -151,8 +167,11 @@ with `rbac-php`/`rbac-db` storage — see `suggest`).
   version — the SDK exposes it only with an event dispatcher, which
   yii3-mcp's factory does not yet carry.
 - For stdio (`mcp:serve`) there is no HTTP request: bind
-  `IdentitySourceInterface` to an env-/config-driven implementation, or
+  `IdentitySourceInterface` to `StaticIdentitySource`, or
   leave the shared secret as the only (machine) identity.
+- Guest plus `RbacToolVisibility` can legally produce an empty `tools/list`.
+  This is an authorization result, not a core `mcp:list` failure; verify the
+  console identity binding before treating zero visible tools as a registry bug.
 
 ## Examples
 
@@ -161,6 +180,26 @@ See [examples/](examples/) — runs offline.
 | Script | Shows | Needs server? |
 |--------|-------|:-------------:|
 | [`rbac.php`](examples/rbac.php) | Filtered listing, allowed/denied calls, session binding | no |
+
+### Dependency analysers
+
+This leaf package is selected by the root application through config-plugin and
+may legitimately have no class reference in an autoloaded source directory. Keep
+the direct dependency: the application, not a core package, selects the backend
+or bridge. Scope the Composer Dependency Analyser exception to this package:
+
+```php
+use ShipMonk\ComposerDependencyAnalyser\Config\Configuration;
+use ShipMonk\ComposerDependencyAnalyser\Config\ErrorType;
+
+return (new Configuration())->ignoreErrorsOnPackage(
+    'rasuvaeff/yii3-mcp-rbac-bridge',
+    [ErrorType::UNUSED_DEPENDENCY],
+);
+```
+
+`composer-require-checker` detects used but undeclared symbols, not unused
+packages, so this config-only dependency needs no require-checker suppression.
 
 ## Development
 
