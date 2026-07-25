@@ -106,6 +106,7 @@ new PermissionMap(['RefundTool' => 'orders.refund']);   // invokable RefundTool:
 // config/common/di/mcp-rbac.php
 use Rasuvaeff\Yii3McpRbacBridge\ {
     CurrentUserIdentitySource, IdentitySourceInterface, PermissionMap,
+    StaticIdentitySource,
 };
 
 return [
@@ -113,6 +114,20 @@ return [
     PermissionMap::class => static fn () => PermissionMap::fromToolClasses(
         [OrderTools::class],                       // same list as the `tools` params
         // ['order.status' => 'orders.admin'],     // optional explicit overrides
+    ),
+];
+```
+
+Разделяйте identity binding по entry point: в stdio нет HTTP `CurrentUser`:
+
+```php
+// config/web/di.php
+return [IdentitySourceInterface::class => CurrentUserIdentitySource::class];
+
+// config/console/di.php
+return [
+    IdentitySourceInterface::class => static fn () => new StaticIdentitySource(
+        getenv('MCP_USER_ID') ?: null,
     ),
 ];
 ```
@@ -141,6 +156,7 @@ return [
 | `SessionIdentityInterceptor` | привязывает MCP-сессию к её первой идентичности; утёкший `Mcp-Session-Id`, предъявленный с токеном другого пользователя, отклоняется |
 | `PermissionMap` | имя инструмента → разрешение: сканирование `#[RequiredPermission]` + явные переопределения |
 | `CurrentUserIdentitySource` | id идентичности из `CurrentUser` (yiisoft/user) (`null` = гость); реализуйте `IdentitySourceInterface` для stdio/кастомных сценариев |
+| `StaticIdentitySource` | фиксированная config/env identity для console/stdio; `null` означает guest |
 
 ## Замечания по безопасности
 
@@ -158,8 +174,11 @@ return [
   входит — SDK предоставляет её только с event dispatcher, который фабрика
   yii3-mcp пока не прокидывает.
 - Для stdio (`mcp:serve`) HTTP-запроса нет: привяжите
-  `IdentitySourceInterface` к реализации на основе env/конфига, либо
+  `IdentitySourceInterface` к `StaticIdentitySource`, либо
   оставьте общий секрет единственной (машинной) идентичностью.
+- Guest вместе с `RbacToolVisibility` может законно получить пустой
+  `tools/list`. Это результат authorization, а не поломка core `mcp:list`;
+  сначала проверьте console identity binding.
 
 ## Примеры
 
@@ -168,6 +187,27 @@ return [
 | Скрипт | Показывает | Нужен сервер? |
 |--------|-------|:-------------:|
 | [`rbac.php`](examples/rbac.php) | Фильтрованный листинг, разрешённые/отклонённые вызовы, привязка сессии | нет |
+
+### Анализаторы зависимостей
+
+Это leaf-пакет, который root-приложение выбирает через config-plugin, поэтому в
+autoloaded source может законно не быть прямой ссылки на его классы. Сохраняйте
+direct dependency: backend или bridge выбирает приложение, а не core-пакет.
+Исключение Composer Dependency Analyser должно быть ограничено этим пакетом:
+
+```php
+use ShipMonk\ComposerDependencyAnalyser\Config\Configuration;
+use ShipMonk\ComposerDependencyAnalyser\Config\ErrorType;
+
+return (new Configuration())->ignoreErrorsOnPackage(
+    'rasuvaeff/yii3-mcp-rbac-bridge',
+    [ErrorType::UNUSED_DEPENDENCY],
+);
+```
+
+`composer-require-checker` ищет используемые, но не объявленные symbols, а не
+unused packages, поэтому для такой config-only зависимости suppression ему не
+нужен.
 
 ## Разработка
 

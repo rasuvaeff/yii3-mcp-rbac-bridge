@@ -37,7 +37,7 @@ composer require rasuvaeff/yii3-mcp-rbac-bridge
 use Rasuvaeff\Yii3McpRbacBridge\ {
     CurrentUserIdentitySource, IdentitySourceInterface, PermissionMap,
     RbacToolCallInterceptor, RbacToolVisibility, RequiredPermission,
-    SessionIdentityInterceptor,
+    SessionIdentityInterceptor, StaticIdentitySource,
 };
 
 // Declaring:
@@ -67,6 +67,8 @@ new SessionIdentityInterceptor($identitySource);
 // Identity:
 interface IdentitySourceInterface { public function getId(): ?string; } // null = guest
 new CurrentUserIdentitySource($currentUser);   // yiisoft/user CurrentUser
+new StaticIdentitySource('console-agent');     // stdio/config identity
+new StaticIdentitySource();                    // guest
 
 // yii3-mcp params wiring:
 // 'interceptors' => [SessionIdentityInterceptor::class, RbacToolCallInterceptor::class],
@@ -74,3 +76,6 @@ new CurrentUserIdentitySource($currentUser);   // yiisoft/user CurrentUser
 // DI: IdentitySourceInterface => CurrentUserIdentitySource,
 //     PermissionMap => static fn() => PermissionMap::fromToolClasses([...])
 ```
+
+Use CurrentUserIdentitySource in web DI and StaticIdentitySource in console
+DI. Guest + RbacToolVisibility may legitimately return an empty tools/list.
