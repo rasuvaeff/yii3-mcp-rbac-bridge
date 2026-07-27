@@ -23,7 +23,7 @@ hijacking.
 | Requirement | Version |
 |-------------|---------|
 | PHP | 8.3 – 8.5 |
-| `rasuvaeff/yii3-mcp` | `^1.1` |
+| `rasuvaeff/yii3-mcp` | `^1.1 \|\| ^2.0` |
 | `yiisoft/access` | `^2.0` (bind `AccessCheckerInterface` to your RBAC manager) |
 | `yiisoft/user` | `^2.0` (identity of the current request) |
 
@@ -155,10 +155,24 @@ with `rbac-php`/`rbac-db` storage — see `suggest`).
 
 ## Security notes
 
-- **Session binding happens on the first `tools/call`** (the yii3-mcp
-  interceptor chain does not see `initialize`). Between `initialize` and the
-  first call the session carries no identity — nothing is authorized in that
-  window, so nothing is exposed; the binding covers every actual operation.
+- **Two session bindings, two layers.** yii3-mcp 2.0 binds every session to
+  the **MCP client** that created it (immutable owner stamped at
+  `initialize`); this bridge's `SessionIdentityInterceptor` binds the session
+  to the **application user** on the first `tools/call` (the yii3-mcp
+  interceptor chain does not see `initialize`). The layers complement each
+  other: between `initialize` and the first call the session still carries no
+  user identity — nothing is authorized in that window, so nothing is
+  exposed — but on core 2.0 a foreign MCP client can no longer slip into that
+  window with a leaked `Mcp-Session-Id`; only a race inside the same client
+  remains. On core 1.x the client-owner layer does not exist and the
+  first-call user binding is the only session protection.
+- **Session-ownership rejections bypass this bridge.** yii3-mcp 2.0 rejects a
+  foreign or ownerless session (the SDK-shaped 404 from `McpAction`,
+  `SessionOwnershipException` from `InterceptingReferenceHandler`) BEFORE the
+  interceptor chain runs — such a rejection never reaches this bridge's RBAC
+  interceptor or visibility filter. Hijack attempts stopped by the core are
+  therefore visible only in the application/web-server logs, not in anything
+  this bridge observes.
 - Guests are first-class: a guest binds the session as a guest and is denied
   on every permission-mapped tool (`AccessCheckerInterface` receives `null`).
   The internal guest marker cannot be forged by a literal `"guest"` user id.

@@ -24,8 +24,8 @@
     },
     "require": {
         "php": "8.3 - 8.5",
-        "mcp/sdk": "~0.6.0",
-        "rasuvaeff/yii3-mcp": "^1.1",
+        "mcp/sdk": "~0.6.0 || ~0.7.0",
+        "rasuvaeff/yii3-mcp": "^1.1 || ^2.0",
         "yiisoft/access": "^2.0",
         "yiisoft/user": "^2.0"
     },
