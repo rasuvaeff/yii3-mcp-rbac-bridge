@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.0 — 2026-07-27
+
+- Compatibility with yii3-mcp 2.0 (security-hardening release, see the core's
+  [UPGRADE.md](https://github.com/rasuvaeff/yii3-mcp/blob/master/UPGRADE.md)):
+  constraints widened to `rasuvaeff/yii3-mcp ^1.1 || ^2.0` and
+  `mcp/sdk ~0.6.0 || ~0.7.0`. No code changes — verified with a full build and
+  mutation run against core 2.0.
+- Document the session-ownership blind zone: core 2.0 rejects a foreign or
+  ownerless session before the interceptor chain, so such rejections never
+  reach this bridge's RBAC interceptor or visibility filter.
+- Document how the two session bindings relate: the core's immutable
+  client-owner binding at `initialize` vs this bridge's user binding on the
+  first `tools/call`; on core 2.0 the `initialize` → first-call window is no
+  longer open to a foreign client with a leaked session id.
+
 ## 1.1.0 — 2026-07-25
 
 - Add `StaticIdentitySource` for explicit console/stdio identities and document
