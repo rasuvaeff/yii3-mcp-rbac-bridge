@@ -20,6 +20,7 @@ use Testo\Test;
 
 #[Test]
 #[Covers(PermissionMap::class)]
+#[Covers(InvalidPermissionMapException::class)]
 final class PermissionMapTest
 {
     public function readsPermissionsFromAttributes(): void
