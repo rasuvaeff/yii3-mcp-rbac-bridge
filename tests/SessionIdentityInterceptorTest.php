@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Rasuvaeff\Yii3McpRbacBridge\Tests;
 
 use Mcp\Exception\ToolCallException;
+use Mcp\Schema\Enum\ProtocolVersion;
 use Mcp\Server;
 use Mcp\Server\Session\InMemorySessionStore;
+use Mcp\Server\Stateless\RequestMeta;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallContext;
 use Rasuvaeff\Yii3Mcp\McpServerFactory;
@@ -114,6 +116,33 @@ final class SessionIdentityInterceptorTest
         Assert::string($result['content'][0]['text'])->contains('bound to a different identity');
     }
 
+    /**
+     * The stateless 2026-07-28 era (yii3-mcp 4) hands every request a
+     * throwaway session: there is no session to hijack, so a different
+     * identity on the next request is a different caller, not a takeover —
+     * it must not be rejected, and the binding is per request. Identity
+     * comes from each request (the IdentitySource), exactly as RBAC reads it.
+     */
+    public function statelessRequestsBindPerRequestAndAreNotFalselyRejected(): void
+    {
+        if (!class_exists(RequestMeta::class)) {
+            // mcp/sdk < 0.8 (yii3-mcp < 4) has no stateless era
+            Assert::same($this->tester(new FixedIdentitySource('42'))->callTool('ping')['content'][0]['text'], 'pong');
+
+            return;
+        }
+
+        $source = new FixedIdentitySource('42');
+        $factory = new Psr17Factory();
+        $tester = new McpTester($this->server($source, modernEra: true), $factory, $factory, $factory, ProtocolVersion::V2026_07_28);
+
+        Assert::same($tester->callTool('ping')['content'][0]['text'] ?? null, 'pong');
+
+        $source->id = '99';
+
+        Assert::same($tester->callTool('ping')['content'][0]['text'] ?? null, 'pong');
+    }
+
     private function tester(FixedIdentitySource $source): McpTester
     {
         $factory = new Psr17Factory();
@@ -126,13 +155,23 @@ final class SessionIdentityInterceptorTest
         );
     }
 
-    private function server(FixedIdentitySource $source): Server
+    private function server(FixedIdentitySource $source, bool $modernEra = false): Server
     {
-        return (new McpServerFactory(
-            container: new SimpleContainer([OrderTools::class => new OrderTools()]),
-            sessionStore: new InMemorySessionStore(),
-            name: 'identity-suite',
-            version: '1.0.0',
-        ))->create([OrderTools::class], [], [new SessionIdentityInterceptor($source)]);
+        $factory = $modernEra
+            ? new McpServerFactory(
+                container: new SimpleContainer([OrderTools::class => new OrderTools()]),
+                sessionStore: new InMemorySessionStore(),
+                name: 'identity-suite',
+                version: '1.0.0',
+                modernEra: true,
+            )
+            : new McpServerFactory(
+                container: new SimpleContainer([OrderTools::class => new OrderTools()]),
+                sessionStore: new InMemorySessionStore(),
+                name: 'identity-suite',
+                version: '1.0.0',
+            );
+
+        return $factory->create([OrderTools::class], [], [new SessionIdentityInterceptor($source)]);
     }
 }

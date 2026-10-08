@@ -63,6 +63,9 @@ new RbacToolVisibility($accessChecker, $identitySource, $map);
 new SessionIdentityInterceptor($identitySource);
 // binds first identity to the session; different identity later =>
 // tool error "MCP session is bound to a different identity"
+// yii3-mcp 4 stateless era (2026-07-28): every request gets a throwaway
+// session => the binding is per request; identity comes from each request
+// (IdentitySourceInterface), RBAC unchanged; no false rejections.
 
 // Identity:
 interface IdentitySourceInterface { public function getId(): ?string; } // null = guest
