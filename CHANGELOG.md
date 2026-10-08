@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Allow `rasuvaeff/yii3-mcp` `^4.0` and `mcp/sdk` `~0.8.1` alongside the
+  existing constraints. On 4.x's stateless era (MCP 2026-07-28) every request
+  gets a throwaway session, so `SessionIdentityInterceptor` binds per request
+  and does not reject a later request with another identity; RBAC reads the
+  identity per request and is unchanged. Covered by tests on both eras.
+
 ## 1.2.1 — 2026-10-07
 
 - Allow `rasuvaeff/yii3-mcp` `^3.0` alongside the existing constraints — the

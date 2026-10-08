@@ -70,6 +70,15 @@ works, no path repos needed.
   (contains NUL). Never replace it with a printable literal.
 - `SessionIdentityInterceptor` must be OUTERMOST in the interceptor list —
   before RBAC and anything else that trusts the session.
+- **Supported cores span 1.x–4.x** (`mcp/sdk` `~0.6`–`~0.8`). yii3-mcp 4
+  serves the stateless 2026-07-28 era, where the SDK hands every request a
+  throwaway session: the binding is per request there and must never be
+  "hardened" into a rejection — consecutive stateless requests are different
+  callers. Tests touching 4.x-only API (`modernEra`, the tester's revision
+  argument) are guarded by `class_exists(Mcp\Server\Stateless\RequestMeta)`
+  so prefer-lowest (core 1.1) still runs them; the hidden-tool refusal is a
+  tool error up to 3.x and a JSON-RPC `-32602` from 4.0 — assert the refusal,
+  not its shape.
 - No `yiisoft/rbac` in `require` — the app binds `AccessCheckerInterface`
   to its manager (core-doesn't-bind-the-swappable-interface principle);
   rbac sits in `suggest`.

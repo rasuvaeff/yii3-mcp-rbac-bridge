@@ -23,7 +23,7 @@ hijacking.
 | Requirement | Version |
 |-------------|---------|
 | PHP | 8.3 – 8.5 |
-| `rasuvaeff/yii3-mcp` | `^1.1 \|\| ^2.0` |
+| `rasuvaeff/yii3-mcp` | `^1.1 \|\| ^2.0 \|\| ^3.0 \|\| ^4.0` |
 | `yiisoft/access` | `^2.0` (bind `AccessCheckerInterface` to your RBAC manager) |
 | `yiisoft/user` | `^2.0` (identity of the current request) |
 
@@ -155,6 +155,13 @@ with `rbac-php`/`rbac-db` storage — see `suggest`).
 
 ## Security notes
 
+- **Stateless era (yii3-mcp 4, MCP 2026-07-28): identity per request.**
+  That era has no `initialize` and no session: the SDK hands every request a
+  throwaway one. `SessionIdentityInterceptor` then binds per request — there
+  is no session to hijack, and the next request with another identity is
+  another caller, not a takeover, so it is not rejected. Identity comes from
+  each request through `IdentitySourceInterface`, exactly what RBAC reads, so
+  the permission boundary is unchanged.
 - **Two session bindings, two layers.** yii3-mcp 2.0 binds every session to
   the **MCP client** that created it (immutable owner stamped at
   `initialize`); this bridge's `SessionIdentityInterceptor` binds the session

@@ -88,5 +88,11 @@ $allowed = $tester->callTool('order.status', ['orderId' => '7']);
 echo 'order.status -> ' . $allowed['content'][0]['text'] . "\n";
 
 // fail-closed on call as well (visibility rejects before RBAC even runs)
-$denied = $tester->callTool('order.refund', ['orderId' => '7']);
-echo 'order.refund -> isError=' . var_export($denied['isError'], true) . ': ' . $denied['content'][0]['text'] . "\n";
+// refused: a tool error up to yii3-mcp 3.x, from 4.0 the very JSON-RPC error
+// a missing tool gets (a hidden tool must not be told apart from a missing one)
+try {
+    $denied = $tester->callTool('order.refund', ['orderId' => '7']);
+    echo 'order.refund -> isError=' . var_export($denied['isError'], true) . ': ' . $denied['content'][0]['text'] . "\n";
+} catch (RuntimeException $e) {
+    echo 'order.refund -> ' . $e->getMessage() . "\n";
+}
