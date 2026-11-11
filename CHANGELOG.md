@@ -5,8 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.4.0 — 2026-11-11
 
+- Requires `rasuvaeff/yii3-mcp` `^5.0` and `mcp/sdk` `~0.10.0` (yii3-mcp 5.0
+  moved to SDK 0.10 for GHSA-f4rf-6ghj-mhr6). SDK 0.10 moved its classes to
+  new namespaces, so this release cannot also serve cores 1.x–4.x: stay on
+  1.3.0 for those. The bridge's own API is unchanged.
+- Psalm 7 (`vimeo/psalm` `^7.0`, dev only); `infection/infection` `^0.35`.
+- CI: the tag check in `release.yml` and the narrower mutation filter from the
+  monorepo template.
 - Mutation testing now counts code the tests execute without naming it in `#[Covers]`
   (`infection --with-uncovered`), with `PublicVisibility` off as in the monorepo
   template; overall MSI stays 100%. No `src/` or test changes.

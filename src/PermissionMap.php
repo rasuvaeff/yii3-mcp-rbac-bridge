@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Rasuvaeff\Yii3McpRbacBridge;
 
-use Mcp\Capability\Attribute\McpTool;
+use Mcp\Server\Capability\Attribute\McpTool;
 use Rasuvaeff\Yii3McpRbacBridge\Exception\InvalidPermissionMapException;
 use ReflectionClass;
 use ReflectionMethod;

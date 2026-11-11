@@ -24,22 +24,22 @@
     },
     "require": {
         "php": "8.3 - 8.5",
-        "mcp/sdk": "~0.6.0 || ~0.7.0 || ~0.8.1",
-        "rasuvaeff/yii3-mcp": "^1.1 || ^2.0 || ^3.0 || ^4.0",
+        "mcp/sdk": "~0.10.0",
+        "rasuvaeff/yii3-mcp": "^5.0",
         "yiisoft/access": "^2.0",
         "yiisoft/user": "^2.0"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.51",
         "friendsofphp/php-cs-fixer": "^3.95",
-        "infection/infection": "^0.33",
+        "infection/infection": "^0.35",
         "maglnet/composer-require-checker": "^4.17",
         "nyholm/psr7": "^1.8",
         "rector/rector": "^2.4",
         "roave/backward-compatibility-check": "^8.0",
         "testo/bridge-infection": "^0.1.6",
         "testo/testo": "^0.10.25",
-        "vimeo/psalm": "^6.16",
+        "vimeo/psalm": "^7.0",
         "yiisoft/test-support": "^3.0"
     },
     "suggest": {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Mcp\Capability\Attribute\McpTool;
+use Mcp\Server\Capability\Attribute\McpTool;
 use Mcp\Server\Session\InMemorySessionStore;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Rasuvaeff\Yii3Mcp\McpServerFactory;
@@ -88,7 +88,7 @@ $allowed = $tester->callTool('order.status', ['orderId' => '7']);
 echo 'order.status -> ' . $allowed['content'][0]['text'] . "\n";
 
 // fail-closed on call as well (visibility rejects before RBAC even runs)
-// refused: a tool error up to yii3-mcp 3.x, from 4.0 the very JSON-RPC error
+// refused with the very JSON-RPC error
 // a missing tool gets (a hidden tool must not be told apart from a missing one)
 try {
     $denied = $tester->callTool('order.refund', ['orderId' => '7']);

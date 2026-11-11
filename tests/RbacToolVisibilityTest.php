@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Rasuvaeff\Yii3McpRbacBridge\Tests;
 
 use Mcp\Schema\Enum\ProtocolVersion;
-use Mcp\Server;
+use Mcp\Server\Server;
 use Mcp\Server\Session\InMemorySessionStore;
-use Mcp\Server\Stateless\RequestMeta;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Rasuvaeff\Yii3Mcp\McpServerFactory;
 use Rasuvaeff\Yii3Mcp\Testing\McpTester;
@@ -64,13 +63,6 @@ final class RbacToolVisibilityTest
      */
     public function statelessEraKeepsTheRbacBoundary(): void
     {
-        if (!class_exists(RequestMeta::class)) {
-            // mcp/sdk < 0.8 (yii3-mcp < 4) has no stateless era
-            Assert::same(array_column($this->tester(userId: null)->listTools(), 'name'), ['ping']);
-
-            return;
-        }
-
         $factory = new Psr17Factory();
         $guest = new McpTester($this->server(null, modernEra: true), $factory, $factory, $factory, ProtocolVersion::V2026_07_28);
         $user = new McpTester($this->server('42', modernEra: true), $factory, $factory, $factory, ProtocolVersion::V2026_07_28);
