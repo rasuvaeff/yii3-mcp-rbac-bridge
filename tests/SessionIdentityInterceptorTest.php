@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Rasuvaeff\Yii3McpRbacBridge\Tests;
 
-use Mcp\Exception\ToolCallException;
 use Mcp\Schema\Enum\ProtocolVersion;
-use Mcp\Server;
+use Mcp\Server\Exception\ToolCallException;
+use Mcp\Server\Server;
 use Mcp\Server\Session\InMemorySessionStore;
-use Mcp\Server\Stateless\RequestMeta;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallContext;
 use Rasuvaeff\Yii3Mcp\McpServerFactory;
@@ -125,13 +124,6 @@ final class SessionIdentityInterceptorTest
      */
     public function statelessRequestsBindPerRequestAndAreNotFalselyRejected(): void
     {
-        if (!class_exists(RequestMeta::class)) {
-            // mcp/sdk < 0.8 (yii3-mcp < 4) has no stateless era
-            Assert::same($this->tester(new FixedIdentitySource('42'))->callTool('ping')['content'][0]['text'], 'pong');
-
-            return;
-        }
-
         $source = new FixedIdentitySource('42');
         $factory = new Psr17Factory();
         $tester = new McpTester($this->server($source, modernEra: true), $factory, $factory, $factory, ProtocolVersion::V2026_07_28);

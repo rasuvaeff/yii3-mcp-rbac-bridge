@@ -23,7 +23,7 @@ hijacking.
 | Requirement | Version |
 |-------------|---------|
 | PHP | 8.3 – 8.5 |
-| `rasuvaeff/yii3-mcp` | `^1.1 \|\| ^2.0 \|\| ^3.0 \|\| ^4.0` |
+| `rasuvaeff/yii3-mcp` | `^5.0` (cores 1.x–4.x: rbac-bridge 1.3) |
 | `yiisoft/access` | `^2.0` (bind `AccessCheckerInterface` to your RBAC manager) |
 | `yiisoft/user` | `^2.0` (identity of the current request) |
 
