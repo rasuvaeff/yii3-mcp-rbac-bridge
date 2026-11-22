@@ -23,7 +23,7 @@
         "source": "https://github.com/rasuvaeff/yii3-mcp-rbac-bridge"
     },
     "require": {
-        "php": "8.3 - 8.5",
+        "php": "8.3 - 8.6",
         "mcp/sdk": "~0.10.0",
         "rasuvaeff/yii3-mcp": "^5.0",
         "yiisoft/access": "^2.0",
