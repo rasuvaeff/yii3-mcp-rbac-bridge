@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Rasuvaeff\Yii3McpRbacBridge;
 
 use Mcp\Server\Exception\ToolCallException;
-use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallContext;
-use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallInterceptorInterface;
+use Rasuvaeff\Mcp\Interceptor\ToolCallContext;
+use Rasuvaeff\Mcp\Interceptor\ToolCallInterceptorInterface;
 use Yiisoft\Access\AccessCheckerInterface;
 
 /**

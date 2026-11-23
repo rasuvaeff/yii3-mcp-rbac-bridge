@@ -25,7 +25,7 @@
     "require": {
         "php": "8.3 - 8.6",
         "mcp/sdk": "~0.10.0",
-        "rasuvaeff/yii3-mcp": "^5.0",
+        "rasuvaeff/mcp": "^0.1",
         "yiisoft/access": "^2.0",
         "yiisoft/user": "^2.0"
     },
@@ -41,6 +41,9 @@
         "testo/testo": "^0.10.25",
         "vimeo/psalm": "^7.0",
         "yiisoft/test-support": "^3.0"
+    },
+    "conflict": {
+        "rasuvaeff/yii3-mcp": "<6.0"
     },
     "suggest": {
         "yiisoft/rbac": "Bind Yiisoft\\Access\\AccessCheckerInterface to the RBAC manager (with rbac-php or rbac-db storage)"
