@@ -24,7 +24,8 @@ OAuth 2.1: RBAC-разрешения проверяются на каждом `t
 | Требование | Версия |
 |-------------|---------|
 | PHP | 8.3 – 8.6 |
-| `rasuvaeff/yii3-mcp` | `^5.0` (ядра 1.x–4.x: rbac-bridge 1.3) |
+| `rasuvaeff/mcp` | `^0.1` |
+| `rasuvaeff/yii3-mcp` | `^6.0` в приложении Yii3 (для 5.x — bridge `^1.4`) |
 | `yiisoft/access` | `^2.0` (привяжите `AccessCheckerInterface` к вашему RBAC-менеджеру) |
 | `yiisoft/user` | `^2.0` (идентичность текущего запроса) |
 

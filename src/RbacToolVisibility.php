@@ -6,7 +6,7 @@ namespace Rasuvaeff\Yii3McpRbacBridge;
 
 use Mcp\Schema\Tool;
 use Mcp\Server\Session\SessionInterface;
-use Rasuvaeff\Yii3Mcp\Visibility\ToolVisibilityInterface;
+use Rasuvaeff\Mcp\Visibility\ToolVisibilityInterface;
 use Yiisoft\Access\AccessCheckerInterface;
 
 /**

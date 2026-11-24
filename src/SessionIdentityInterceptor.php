@@ -6,8 +6,8 @@ namespace Rasuvaeff\Yii3McpRbacBridge;
 
 use Mcp\Server\Exception\ToolCallException;
 use Mcp\Server\Session\SessionInterface;
-use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallContext;
-use Rasuvaeff\Yii3Mcp\Interceptor\ToolCallInterceptorInterface;
+use Rasuvaeff\Mcp\Interceptor\ToolCallContext;
+use Rasuvaeff\Mcp\Interceptor\ToolCallInterceptorInterface;
 
 /**
  * Binds the MCP session to the identity that first used it and rejects any
